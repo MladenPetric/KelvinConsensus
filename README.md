@@ -1,9 +1,9 @@
 # KelvinConsensus
 
-![GitHub top language](https://img.shields.io/github/languages/top/cetkovicaleksa/kelvinconsensus)
-![GitHub contributors](https://img.shields.io/github/contributors/cetkovicaleksa/kelvinconsensus)
-![GitHub last commit](https://img.shields.io/github/last-commit/cetkovicaleksa/kelvinconsensus)
-![GitHub license](https://img.shields.io/github/license/cetkovicaleksa/kelvinconsensus)
+![GitHub top language](https://img.shields.io/github/languages/top/mladenpetric/kelvinconsensus)
+![GitHub contributors](https://img.shields.io/github/contributors/mladenpetric/kelvinconsensus)
+![GitHub last commit](https://img.shields.io/github/last-commit/mladenpetric/kelvinconsensus)
+![GitHub license](https://img.shields.io/github/license/mladenpetric/kelvinconsensus)
 ---
 
 Distributed system developed with **WCF** for course **Software for supervisory control and management systems (_Softver nadzorno-upravljačkih sistema_)**. 

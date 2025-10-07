@@ -38,6 +38,28 @@ public class SensorDatabse
         return Convert.ToDouble(result);
     }
 
+
+    public List<double> GetAllMeasurements()
+    {
+        string sql = "SELECT temperature FROM measurements ORDER BY id ASC"; 
+        var measurements = new List<double>();
+
+        using var connection = new NpgsqlConnection(_connectionString);
+        connection.Open();
+
+        using var cmd = new NpgsqlCommand(sql, connection);
+        using var reader = cmd.ExecuteReader();
+        {
+            while (reader.Read())
+            {
+                if (!reader.IsDBNull(0))
+                    measurements.Add(reader.GetDouble(0));
+            }
+        }
+
+        return measurements;
+    }
+
     public void ClearMeasurements()
     {
         string sql = "DELETE FROM measurements";

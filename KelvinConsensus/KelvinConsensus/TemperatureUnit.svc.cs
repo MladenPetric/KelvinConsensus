@@ -11,7 +11,7 @@ namespace KelvinConsensus
 {
     public class TemperatureUnit : ITemperatureUnit
     {
-        private readonly int QUORUM_SIZE = 2, HISTORY_LIMIT = 1_000;
+        private readonly int QUORUM_SIZE = 2, HISTORY_LIMIT = 1_000, N_SENSORS = 3;
         private readonly double PRECISION = 5;
         private readonly TimeSpan AUTO_SYNC_DELAY = TimeSpan.FromMinutes(1); // TODO: Implement auto sync
 
@@ -22,7 +22,7 @@ namespace KelvinConsensus
 
 
         public TemperatureUnit() {
-            _sensors = ImmutableList<ITemperatureSensor>.Empty; // TODO: Use ServiceHost to talk to sensor serivces
+            _sensors = DiscoverSensors().ToImmutableList();
         }
 
 
@@ -104,5 +104,13 @@ namespace KelvinConsensus
             {
                 _opLock.ExitWriteLock();
             }
+        }
+
+        private List DiscoverSensors()
+        {
+            return Enumerable.Range(0, N_SENSORS)
+                .Select(i => $"http://localhost:{8000 + i}/TemperatureSensor.svc")
+                .Select(url => new ChannelFactory<ITemperatureSensor>(new BasicHttpBinding(), new EndpointAddres(url)).CreateChannel())
+                .ToList();
         }
     }

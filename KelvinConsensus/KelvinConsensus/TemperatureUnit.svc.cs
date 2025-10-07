@@ -1,8 +1,8 @@
 using System;
 using System.ServiceModel;
-using System.ServiceModel.Web;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -83,7 +83,7 @@ namespace KelvinConsensus
             _history.Enqueue(consensus.Value);
 
             while (_history.Count > HISTORY_LIMIT)
-                _history.TryDeque(out _);
+                _history.TryDequeue(out _);
 
             return consensus.Value;
         }
@@ -96,7 +96,7 @@ namespace KelvinConsensus
                 double avgTemperature = _history.ToArray().DefaultIfEmpty(293.15).Average();
                 Console.WriteLine($"Preforming sync - writing {avgTemperature}K (average temperature across past readings) to all sensors");
                 Parallel.ForEach(_sensors, (sensor) => sensor.SyncTemperature(avgTemperature));
-            } catch (AggregateException ex)
+            } catch (Exception ex)
             {
                 Console.WriteLine($"Sync failed for one or more sensors");
             }
@@ -106,7 +106,7 @@ namespace KelvinConsensus
             }
         }
 
-        private List DiscoverSensors()
+        private List<ITemperatureSensor> DiscoverSensors()
         {
             return Enumerable.Range(0, N_SENSORS)
                 .Select(i => $"http://localhost:{8000 + i}/TemperatureSensor.svc")

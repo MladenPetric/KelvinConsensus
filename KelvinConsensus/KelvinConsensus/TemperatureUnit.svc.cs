@@ -11,7 +11,7 @@ namespace KelvinConsensus
 {
     public class TemperatureUnit : ITemperatureUnit
     {
-        private readonly int QUORUM_SIZE = 2;
+        private readonly int QUORUM_SIZE = 2, HISTORY_LIMIT = 1_000;
         private readonly double PRECISION = 5;
         private readonly TimeSpan AUTO_SYNC_DELAY = TimeSpan.FromMinutes(1); // TODO: Implement auto sync
 
@@ -81,6 +81,10 @@ namespace KelvinConsensus
             }
 
             _history.Enqueue(consensus.Value);
+
+            while (_history.Count > HISTORY_LIMIT)
+                _history.TryDeque(out _);
+
             return consensus.Value;
         }
 

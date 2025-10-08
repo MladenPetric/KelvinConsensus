@@ -4,77 +4,82 @@ using System.Threading;
 using System.Threading.Tasks;
 using Npgsql;
 
-[ServiceBehavior(InstanceContextMode = InstanceContextMode.Single)]
-public class TemperatureSensorService : ITemperatureSensor
+namespace KelvinConsensus
 {
-    private readonly SensorDatabase _db;
-    private readonly Random _rand = new Random();
-    private readonly ReaderWriterLockSlim _lock = new();
 
-    private Timer _measurementTimer;
-
-    public TemperatureSensorService(SensorName name)
+    [ServiceBehavior(InstanceContextMode = InstanceContextMode.Single)]
+    public class TemperatureSensorService : ITemperatureSensor
     {
-        _db = new SensorDatabase(name);
+        private readonly SensorDatabase _db;
+        private readonly Random _rand = new Random();
+        private readonly ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
 
-        StartMeasurementGeneration();
-    }
+        private Timer _measurementTimer;
 
-    private void StartMeasurementGeneration()
-    {
-        GenerateMeasurement();
-        int interval = _rand.Next(1000, 10000);
-        _measurementTimer = new Timer(_ =>
+        public TemperatureSensorService(SensorName name)
+        {
+            _db = new SensorDatabase(name);
+
+            StartMeasurementGeneration();
+        }
+
+        private void StartMeasurementGeneration()
         {
             GenerateMeasurement();
+            int interval = _rand.Next(1000, 10000);
+            _measurementTimer = new Timer(_ =>
+            {
+                GenerateMeasurement();
 
-            _measurementTimer.Change(_rand.Next(1000, 10000), Timeout.Infinite);
-        }, null, interval, Timeout.Infinite);
+                _measurementTimer.Change(_rand.Next(1000, 10000), Timeout.Infinite);
+            }, null, interval, Timeout.Infinite);
+        }
+
+        private void GenerateMeasurement()
+        {
+            double temperature = _rand.Next(0, 30) + _rand.NextDouble();
+
+            _lock.EnterWriteLock();
+            try
+            {
+                _db.InsertMeasurement(temperature);
+                Console.WriteLine($"[Sensor] Inserted new measurement: {temperature:F2}°C");
+            }
+            finally
+            {
+                _lock.ExitWriteLock();
+            }
+        }
+
+        public double ReadTemperature()
+        {
+            _lock.EnterReadLock();
+            try
+            {
+                var last = _db.GetLastMeasurement();
+                if (last.HasValue)
+                    return last.Value;
+                throw new Exception("No measurement in database");
+            }
+            finally
+            {
+                _lock.ExitReadLock();
+            }
+        }
+
+        public void SyncTemperature(double temperature)
+        {
+            _lock.EnterWriteLock();
+            try
+            {
+                _db.InsertMeasurement(temperature);
+                Console.WriteLine($"[Sensor] Synced measurement to {temperature:F2}°C");
+            }
+            finally
+            {
+                _lock.ExitWriteLock();
+            }
+        }
     }
 
-    private void GenerateMeasurement()
-    {
-        double temperature = _rand.Next(0, 30) + _rand.NextDouble();
-
-        _lock.EnterWriteLock();
-        try
-        {
-            _db.InsertMeasurement(temperature);
-            Console.WriteLine($"[Sensor] Inserted new measurement: {temperature:F2}°C");
-        }
-        finally
-        {
-            _lock.ExitWriteLock();
-        }
-    }
-
-    public double ReadTemperature()
-    {
-        _lock.EnterReadLock();
-        try
-        {
-            var last = _db.GetLastMeasurement();
-            if (last.HasValue)
-                return last.Value;
-            throw new Exception("No measurement in database");
-        }
-        finally
-        {
-            _lock.ExitReadLock();
-        }
-    }
-
-    public void SyncTemperature(double temperature)
-    {
-        _lock.EnterWriteLock();
-        try
-        {
-            _db.InsertMeasurement(temperature);
-            Console.WriteLine($"[Sensor] Synced measurement to {temperature:F2}°C");
-        }
-        finally
-        {
-            _lock.ExitWriteLock();
-        }
-    }
 }

@@ -17,16 +17,18 @@ namespace KelvinConsensus
 
         private ImmutableList<ITemperatureSensor> _sensors;
 
-        private ConcurrentQueue<double> _history = new();
-        private ReaderWriterLockSlim _opLock = new();
+        private ConcurrentQueue<double> _history = new ConcurrentQueue<double>();
+        private ReaderWriterLockSlim _opLock = new ReaderWriterLockSlim();
 
 
-        public TemperatureUnit() {
+        public TemperatureUnit()
+        {
             _sensors = DiscoverSensors().ToImmutableList();
         }
 
 
-        public double ReadTemperature() {
+        public double ReadTemperature()
+        {
             var readings = new ConcurrentBag<double>();
 
             _opLock.EnterReadLock();
@@ -96,7 +98,8 @@ namespace KelvinConsensus
                 double avgTemperature = _history.ToArray().DefaultIfEmpty(293.15).Average();
                 Console.WriteLine($"Preforming sync - writing {avgTemperature}K (average temperature across past readings) to all sensors");
                 Parallel.ForEach(_sensors, (sensor) => sensor.SyncTemperature(avgTemperature));
-            } catch (Exception ex)
+            }
+            catch (Exception)
             {
                 Console.WriteLine($"Sync failed for one or more sensors");
             }
@@ -110,7 +113,8 @@ namespace KelvinConsensus
         {
             return Enumerable.Range(0, N_SENSORS)
                 .Select(i => $"http://localhost:{8000 + i}/TemperatureSensor.svc")
-                .Select(url => new ChannelFactory<ITemperatureSensor>(new BasicHttpBinding(), new EndpointAddres(url)).CreateChannel())
+                .Select(url => new ChannelFactory<ITemperatureSensor>(new BasicHttpBinding(), new EndpointAddress(url)).CreateChannel())
                 .ToList();
         }
     }
+}

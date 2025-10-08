@@ -8,7 +8,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{BDE2019A-21DF-4B90-A907-FD5BD1EBF707}</ProjectGuid>
     <ProjectTypeGuids>{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
-    <OutputType>Library</OutputType>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>KelvinConsensus</RootNamespace>
     <AssemblyName>KelvinConsensus</AssemblyName>
@@ -61,27 +61,41 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Service1.svc" />
+    <Content Include="TemperatureSensor.svc" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Service1.svc.cs">
-      <DependentUpon>Service1.svc</DependentUpon>
+    <Compile Include="TemperatureSensor.svc.cs">
+      <DependentUpon>TemperatureSensor.svc</DependentUpon>
     </Compile>
-    <Compile Include="IService1.cs" />
+    <Compile Include="ITemperatureSensor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="TemperatureUnit.svc" />
+    <Content Include="Web.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="TemperatureUnit.svc.cs">
+      <DependentUpon>TemperatureUnit.svc</DependentUpon>
+    </Compile>
+    <Compile Include="ITemperatureUnit.cs" />
+  </ItemGroup>
+	<ItemGroup>
+		<Compile Include="SensorName.cs" />
+		<Compile Include="database/SensorDatabase.cs" />
+		<Compile Include="Program.cs" />
+	</ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Web.Debug.config">
-      <DependentUpon>Web.config</DependentUpon>
-    </None>
-    <None Include="Web.Release.config">
-      <DependentUpon>Web.config</DependentUpon>
-    </None>
+	  <PackageReference Include="System.Collections.Immutable" Version="7.0.0"/>
+	  <PackageReference Include="Npgsql" Version="7.0.1"/>
   </ItemGroup>
+  <PropertyGroup>
+	  <RuntimeIdentifiers>win</RuntimeIdentifiers>	
+  </PropertyGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>

@@ -11,6 +11,7 @@ namespace KelvinConsensus
 {
     public class TemperatureUnit : ITemperatureUnit
     {
+        private readonly string TAG = "UNIT";
         private readonly int QUORUM_SIZE = 2, HISTORY_LIMIT = 1_000, N_SENSORS = 3;
         private readonly double PRECISION = 5;
         private readonly TimeSpan AUTO_SYNC_DELAY = TimeSpan.FromMinutes(1); // TODO: Implement auto sync
@@ -43,7 +44,7 @@ namespace KelvinConsensus
                     }
                     catch (FaultException ex)
                     {
-                        Console.WriteLine($"Reading from sensor {_sensors.IndexOf(sensor)} failed - {ex.Message}");
+                        Console.WriteLine($"[{TAG}] Reading from sensor {_sensors.IndexOf(sensor)} failed - {ex.Message}");
                     }
                 });
             }
@@ -53,14 +54,18 @@ namespace KelvinConsensus
             }
 
             var counts = readings
-                    .GroupBy(r => Math.Round(r, 2))
+                    .GroupBy(r => Math.Round(r, 1))
                     .Select(g => new { Value = g.Key, Count = g.Count() })
                     .OrderByDescending(r => r.Count)
                     .ToList();
 
+            Console.WriteLine(
+                $"[{TAG}] Sensor readings:" + Environment.NewLine + string.Join(Environment.NewLine, counts.Select(item => $"  Value: {item.Value:F2}, Count: {item.Count}"))
+            );
+
             if (counts.Count == 0)
             {
-                Console.WriteLine("Reading failed - no sensors replied");
+                Console.WriteLine($"[{TAG}] Reading failed - no sensors replied");
                 return double.NaN;
             }
 
@@ -71,14 +76,21 @@ namespace KelvinConsensus
             {
                 if (consensus.Count < QUORUM_SIZE)
                 {
-                    Console.WriteLine($"Reading failed - quorum size not reached ({consensus.Count}/{QUORUM_SIZE})");
+                    Console.WriteLine($"[{TAG}] Reading failed - quorum size not reached ({consensus.Count}/{QUORUM_SIZE})");
                 }
                 else if (dFromAverage > PRECISION)
                 {
-                    Console.WriteLine($"Reading failed - consensus on {consensus.Value} but average is {readings.Average()}");
+                    Console.WriteLine($"[{TAG}] Reading failed - consensus on {consensus.Value} but average is {readings.Average()}");
                 }
-                //Sync();
-                Task.Run(Sync);
+
+                bool started = false;
+                Task.Run(() =>
+                {
+                    started = true;
+                    Sync();
+                });
+
+                while (!started) { }
                 return double.NaN;
             }
 
@@ -96,12 +108,12 @@ namespace KelvinConsensus
             try
             {
                 double avgTemperature = _history.ToArray().DefaultIfEmpty(293.15).Average();
-                Console.WriteLine($"Preforming sync - writing {avgTemperature}K (average temperature across past readings) to all sensors");
+                Console.WriteLine($"[{TAG}] Preforming sync - writing {avgTemperature}K (average temperature across past readings) to all sensors");
                 Parallel.ForEach(_sensors, (sensor) => sensor.SyncTemperature(avgTemperature));
             }
             catch (Exception)
             {
-                Console.WriteLine($"Sync failed for one or more sensors");
+                Console.WriteLine($"[{TAG}] Sync failed for one or more sensors");
             }
             finally
             {

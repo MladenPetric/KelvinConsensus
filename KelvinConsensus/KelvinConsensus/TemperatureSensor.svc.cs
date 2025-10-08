@@ -37,13 +37,13 @@ namespace KelvinConsensus
 
         private void GenerateMeasurement()
         {
-            double temperature = _rand.Next(0, 30) + _rand.NextDouble();
+            double temperature = 273.15 + _rand.Next(0, 30) + _rand.NextDouble();
 
             _lock.EnterWriteLock();
             try
             {
                 _db.InsertMeasurement(temperature);
-                Console.WriteLine($"[Sensor] Inserted new measurement: {temperature:F2}°C");
+                //Console.WriteLine($"[Sensor] Inserted new measurement: {temperature:F2}K");
             }
             finally
             {
@@ -73,7 +73,7 @@ namespace KelvinConsensus
             try
             {
                 _db.InsertMeasurement(temperature);
-                Console.WriteLine($"[Sensor] Synced measurement to {temperature:F2}°C");
+                Console.WriteLine($"[Sensor] Synced measurement to {temperature:F2}K");
             }
             finally
             {

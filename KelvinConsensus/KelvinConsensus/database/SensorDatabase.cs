@@ -18,7 +18,7 @@ namespace KelvinConsensus
 
         public void InsertMeasurement(double temperature)
         {
-            string sql = "INSERT INTO measurements (temperature) VALUES (@temp)\\";
+            string sql = "INSERT INTO measurements (temperature) VALUES (@temp)";
 
             using (var connection = new NpgsqlConnection(_connectionString))
             {

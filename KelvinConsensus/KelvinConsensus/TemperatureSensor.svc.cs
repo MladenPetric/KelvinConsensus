@@ -43,7 +43,7 @@ namespace KelvinConsensus
             try
             {
                 _db.InsertMeasurement(temperature);
-                //Console.WriteLine($"[Sensor] Inserted new measurement: {temperature:F2}K");
+                //Console.WriteLine($"{DateTime.Now:HH:mm:ss.fff}: [Sensor] Inserted new measurement: {temperature:F2}K");
             }
             finally
             {
@@ -73,7 +73,7 @@ namespace KelvinConsensus
             try
             {
                 _db.InsertMeasurement(temperature);
-                Console.WriteLine($"[Sensor] Synced measurement to {temperature:F2}K");
+                Console.WriteLine($"{DateTime.Now:HH:mm:ss.fff}: [Sensor] Synced measurement to {temperature:F2}K");
             }
             finally
             {

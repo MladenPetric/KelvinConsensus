@@ -20,19 +20,19 @@ namespace KelvinConsensus
             {
                 for (int i = 0; i < N_SENSORS; ++i) {
                     var baseUri = new Uri(string.Format(sensorUrlFmt, 8_000 + i));
+                    Console.WriteLine($"Sensor {i} running at `{baseUri}`.");
                     var host = new ServiceHost(new TemperatureSensorService(sensorNames[i]), baseUri);
                     host.AddServiceEndpoint(typeof(ITemperatureSensor), new BasicHttpBinding(), "");
                     host.Open();
                     hosts.Add(host);
-                    Console.WriteLine($"Sensor {i} running at `{baseUri}`.");
                 }
 
                 var unitBaseUri = new Uri($"http://localhost:{8_000 + N_SENSORS + 1}/TemperatureUnit.svc");
+                Console.WriteLine($"Unit running at `{unitBaseUri}`.");
                 var unitHost = new ServiceHost(typeof(TemperatureUnit), unitBaseUri);
                 unitHost.AddServiceEndpoint(typeof(ITemperatureUnit), new BasicHttpBinding(), "");
                 unitHost.Open();
                 hosts.Add(unitHost);
-                Console.WriteLine($"Unit running at `{unitBaseUri}`.");
 
                 var unit = new ChannelFactory<ITemperatureUnit>(new BasicHttpBinding(), new EndpointAddress(unitBaseUri)).CreateChannel();
 

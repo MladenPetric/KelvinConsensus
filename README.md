@@ -14,5 +14,5 @@ Read the project specification<sup>[sEn]</sup> <sup>[sSr]</sup>.
 - **A**leksa Ćetković • [cetkovic.sv77.2022@uns.ac.rs](mailto:cetkovic.sv77.2022%40uns.ac.rs)  
 - **P**etar Dragičević • [dragicevic.sv12@uns.ac.rs](mailto:dragicevic.sv12%40uns.ac.rs)  
 
-[sEn]: <./specification.en.md> "Project specification (English)"
-[sSr]: <./specification.sr.md> "Project specification (Serbian - original)"
+[sEn]: <./Docs/specification.en.md> "Project specification (English)"
+[sSr]: <./Docs/specification.sr.md> "Project specification (Serbian - original)"
